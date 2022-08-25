@@ -154,15 +154,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.outputVersion = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const semver = __importStar(__nccwpck_require__(1383));
-const outputVersion = (name, prefix, currentVersion) => {
-    core.setOutput(name, currentVersion);
-    core.setOutput(`${name}-major`, `${prefix}${semver.major(currentVersion)}`);
-    core.setOutput(`${name}-minor`, `${prefix}${semver.major(currentVersion)}.${semver.minor(currentVersion)}`);
-    core.setOutput(`${name}-patch`, `${prefix}${semver.major(currentVersion)}.${semver.minor(currentVersion)}.${semver.patch(currentVersion)}`);
-    core.setOutput(`${name}-major-only`, semver.major(currentVersion));
-    core.setOutput(`${name}-minor-only`, semver.minor(currentVersion));
-    core.setOutput(`${name}-patch-only`, semver.patch(currentVersion));
-    core.setOutput(`${name}-prerelease-only`, semver.prerelease(currentVersion));
+const outputVersion = (name, prefix, version) => {
+    core.setOutput(name, `${prefix}${version}`);
+    core.setOutput(`${name}-major`, `${prefix}${semver.major(version)}`);
+    core.setOutput(`${name}-minor`, `${prefix}${semver.major(version)}.${semver.minor(version)}`);
+    core.setOutput(`${name}-patch`, `${prefix}${semver.major(version)}.${semver.minor(version)}.${semver.patch(version)}`);
+    core.setOutput(`${name}-major-only`, semver.major(version));
+    core.setOutput(`${name}-minor-only`, semver.minor(version));
+    core.setOutput(`${name}-patch-only`, semver.patch(version));
+    core.setOutput(`${name}-prerelease-only`, semver.prerelease(version));
 };
 exports.outputVersion = outputVersion;
 

@@ -17,3 +17,6 @@ jobs:
         uses: conventional-actions/create-release@v1
         with:
           tag_name: ${{steps.version.outputs.version}}
+
+permissions:
+  contents: write
