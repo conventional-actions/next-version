@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import {addBangNotes} from './add-bang-notes'
 import {ReleaseType} from 'semver'
 
@@ -15,14 +16,20 @@ export const whatBump = (commits: any): BumpInfo => {
   let features = 0
 
   for (const commit of commits) {
+    core.debug(`evaluating commit ${commit}`)
+
     // adds additional breaking change notes
     // for the special case, test(system)!: hello world, where there is
     // a '!' but no 'BREAKING CHANGE' in body:
     addBangNotes(commit)
     if (commit.notes.length > 0) {
+      core.debug(`detected breaking change ${commit.notes}`)
+
       breakings += commit.notes.length
       level = 0
     } else if (commit.type === 'feat' || commit.type === 'feature') {
+      core.debug(`detected feature ${commit.type}`)
+
       features += 1
       if (level === 2) {
         level = 1

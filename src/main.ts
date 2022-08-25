@@ -25,15 +25,21 @@ async function run(): Promise<void> {
           const nextVersion = '0.0.1'
 
           core.warning('No tags')
+          core.debug('release-type = patch')
           core.setOutput('release-type', 'patch')
+          core.debug('bumped = true')
           core.setOutput('bumped', true)
+          core.debug(`current-version = ${prefix}, ${currentVersion}`)
           outputVersion('current-version', prefix, currentVersion)
+          core.debug(`version = ${prefix}, ${nextVersion}`)
           outputVersion('version', prefix, nextVersion)
           core.info(
             `patch release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
           )
           return
         }
+
+        core.debug(`last tag = ${tags[0]}`)
 
         gitRawCommits({
           format: '%B%n-hash-%n%H',
@@ -46,24 +52,35 @@ async function run(): Promise<void> {
               const commits = data
 
               const currentVersion = semver.clean(tags[0].toString()) || '0.0.0'
+              core.debug(`current version = ${currentVersion}`)
 
               if (!commits || !commits.length) {
                 core.warning('No commits since last release')
+                core.debug('release-type = none')
                 core.setOutput('release-type', 'none')
+                core.debug('bumped = false')
                 core.setOutput('bumped', false)
+                core.debug(`current-version = ${prefix}, ${currentVersion}`)
                 outputVersion('current-version', prefix, currentVersion)
+                core.debug(`version = ${prefix}, ${currentVersion}`)
                 outputVersion('version', prefix, currentVersion)
                 core.info(`no release ${prefix}${currentVersion}`)
                 return
               }
 
               const result = whatBump(commits)
+              core.debug(`whatBump = ${result}`)
               const nextVersion =
                 semver.inc(currentVersion, result.releaseType) || '0.0.1'
 
+              core.debug(`nextVersion = ${nextVersion}`)
+              core.debug(`release-type = result.releaseType`)
               core.setOutput('release-type', result.releaseType)
+              core.debug('bumped = true')
               core.setOutput('bumped', true)
+              core.debug(`current-version = ${prefix}, ${currentVersion}`)
               outputVersion('current-version', prefix, currentVersion)
+              core.debug(`version = ${prefix}, ${nextVersion}`)
               outputVersion('version', prefix, nextVersion)
               core.info(
                 `${result.releaseType} release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
