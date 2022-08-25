@@ -1,0 +1,19 @@
+name: 'release'
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - id: version
+        name: Determine next version
+        uses: ./
+      - name: Create release
+        uses: conventional-actions/create-release@v1
+        with:
+          tag_name: ${{steps.version.outputs.version}}

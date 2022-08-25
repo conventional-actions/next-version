@@ -21,11 +21,17 @@ async function run(): Promise<void> {
       },
       (err, tags) => {
         if (!tags || !tags.length) {
+          const currentVersion = '0.0.0'
+          const nextVersion = '0.0.1'
+
           core.warning('No tags')
           core.setOutput('release-type', 'patch')
           core.setOutput('bumped', true)
-          outputVersion('current-version', prefix, '0.0.0')
-          outputVersion('version', prefix, '0.0.1')
+          outputVersion('current-version', prefix, currentVersion)
+          outputVersion('version', prefix, nextVersion)
+          core.info(
+            `patch release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
+          )
           return
         }
 
@@ -47,6 +53,7 @@ async function run(): Promise<void> {
                 core.setOutput('bumped', false)
                 outputVersion('current-version', prefix, currentVersion)
                 outputVersion('version', prefix, currentVersion)
+                core.info(`no release ${prefix}${currentVersion}`)
                 return
               }
 
@@ -58,6 +65,9 @@ async function run(): Promise<void> {
               core.setOutput('bumped', true)
               outputVersion('current-version', prefix, currentVersion)
               outputVersion('version', prefix, nextVersion)
+              core.info(
+                `${result.releaseType} release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
+              )
             })
           )
       }

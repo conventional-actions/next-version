@@ -74,11 +74,14 @@ async function run() {
             skipUnstable
         }, (err, tags) => {
             if (!tags || !tags.length) {
+                const currentVersion = '0.0.0';
+                const nextVersion = '0.0.0';
                 core.warning('No tags');
                 core.setOutput('release-type', 'patch');
                 core.setOutput('bumped', true);
-                (0, output_version_1.outputVersion)('current-version', prefix, '0.0.0');
-                (0, output_version_1.outputVersion)('version', prefix, '0.0.1');
+                (0, output_version_1.outputVersion)('current-version', prefix, currentVersion);
+                (0, output_version_1.outputVersion)('version', prefix, nextVersion);
+                core.info(`patch release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`);
                 return;
             }
             (0, git_raw_commits_1.default)({
@@ -96,6 +99,7 @@ async function run() {
                     core.setOutput('bumped', false);
                     (0, output_version_1.outputVersion)('current-version', prefix, currentVersion);
                     (0, output_version_1.outputVersion)('version', prefix, currentVersion);
+                    core.info(`no release ${prefix}${currentVersion}`);
                     return;
                 }
                 const result = (0, what_bump_1.whatBump)(commits);
@@ -104,6 +108,7 @@ async function run() {
                 core.setOutput('bumped', true);
                 (0, output_version_1.outputVersion)('current-version', prefix, currentVersion);
                 (0, output_version_1.outputVersion)('version', prefix, nextVersion);
+                core.info(`${result.releaseType} release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`);
             }));
         });
     }
