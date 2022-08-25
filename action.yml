@@ -1,0 +1,62 @@
+name: 'next-version'
+description: 'Next version using conventional commits'
+author: 'Conventional Actions'
+branding:
+  icon: 'hash'
+  color: 'purple'
+inputs:
+  path:
+    required: false
+    description: 'filter commits to the path provided'
+  prefix:
+    required: false
+    description: 'prefix to prepend to versions'
+    default: 'v'
+  tag-prefix:
+    required: false
+    description: 'specify a prefix for the git tag to be ignored from the semver checks'
+    default: 'v'
+  skip-unstable:
+    required: false
+    description: 'if true, unstable tags (e.g. x.x.x-alpha.1, x.x.x-rc.2) will be skipped'
+    default: 'false'
+outputs:
+  release-type:
+    description: 'type of release (none, major, minor, patch, prerelease)'
+  current-version:
+    description: 'the current version (v1.2.2rc2)'
+  current-version-major:
+    description: 'the major version (v1)'
+  current-version-minor:
+    description: 'the major and minor version (v1.2)'
+  current-version-patch:
+    description: 'the major, minor and patch version (v1.2.2)'
+  current-version-major-only:
+    description: 'the major version component (1)'
+  current-version-minor-only:
+    description: 'the minor version component (2)'
+  current-version-patch-only:
+    description: 'the patch version component (2)'
+  current-version-prerelease-only:
+    description: 'the prerelease version only (rc2)'
+  version:
+    description: 'the new version (v1.2.3)'
+  version-major:
+    description: 'the major version (v1)'
+  version-minor:
+    description: 'the major and minor version (v1.2)'
+  version-patch:
+    description: 'the major, minor and patch version (v1.2.3)'
+  version-major-only:
+    description: 'the major version component (1)'
+  version-minor-only:
+    description: 'the minor version component (2)'
+  version-patch-only:
+    description: 'the patch version component (3)'
+  version-prerelease-only:
+    description: 'the prerelease version only (rc2)'
+  bumped:
+    description: 'true if the version has been bumped'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
