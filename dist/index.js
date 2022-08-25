@@ -75,7 +75,7 @@ async function run() {
         }, (err, tags) => {
             if (!tags || !tags.length) {
                 const currentVersion = '0.0.0';
-                const nextVersion = '0.0.0';
+                const nextVersion = '0.0.1';
                 core.warning('No tags');
                 core.setOutput('release-type', 'patch');
                 core.setOutput('bumped', true);
