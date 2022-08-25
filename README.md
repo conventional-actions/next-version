@@ -7,7 +7,8 @@ A GitHub Action for calculating the next version based on [conventional commits]
 To use the GitHub Action, add the following to your job:
 
 ```yaml
-- uses: conventional-actions/next-version@v1
+- id: version
+  uses: conventional-actions/next-version@v1
 ```
 
 ### Inputs
@@ -41,6 +42,26 @@ To use the GitHub Action, add the following to your job:
 | `version-patch-only`              | `4`                                             | the patch version component         |
 | `version-prerelease-only`         | `rc2`                                           | the prerelease version only         |
 | `bumped`                          | `true`, `false`                                 | true if the version has been bumped |
+
+### Example
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: version
+        uses: conventional-actions/next-version@v1
+      - id: ${{steps.version.bumped}} == true
+        run: |
+          echo ${{steps.version.version}} > VERSION
+```
 
 ## License
 
