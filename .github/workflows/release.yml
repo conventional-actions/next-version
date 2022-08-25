@@ -17,6 +17,10 @@ jobs:
         uses: conventional-actions/create-release@v1
         with:
           tag_name: ${{steps.version.outputs.version}}
+      - name: Create major release
+        uses: conventional-actions/create-release@v1
+        with:
+          tag_name: ${{steps.version.outputs.version-major}}
 
 permissions:
   contents: write
