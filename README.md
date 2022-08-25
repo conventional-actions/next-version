@@ -1,6 +1,6 @@
 # next-version
 
-A GitHub Action for calculating the next version based on [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/.
+A GitHub Action for calculating the next version based on [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ## Usage
 
