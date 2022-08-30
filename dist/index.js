@@ -23,6 +23,50 @@ exports.addBangNotes = addBangNotes;
 
 /***/ }),
 
+/***/ 88:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getConfig = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+async function getConfig() {
+    return {
+        path: core.getInput('path'),
+        prefix: core.getInput('prefix') || 'v',
+        tagPrefix: core.getInput('tag-prefix') || 'v',
+        skipUnstable: core.getInput('skip-unstable') === 'true'
+    };
+}
+exports.getConfig = getConfig;
+
+
+/***/ }),
+
 /***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -63,15 +107,13 @@ const git_raw_commits_1 = __importDefault(__nccwpck_require__(9834));
 const what_bump_1 = __nccwpck_require__(2);
 const output_version_1 = __nccwpck_require__(1629);
 const semver = __importStar(__nccwpck_require__(1383));
+const config_1 = __nccwpck_require__(88);
 async function run() {
     try {
-        const path = core.getInput('path');
-        const prefix = core.getInput('prefix') || 'v';
-        const tagPrefix = core.getInput('tag-prefix') || 'v';
-        const skipUnstable = core.getInput('skip-unstable') === 'true';
+        const config = await (0, config_1.getConfig)();
         (0, git_semver_tags_1.default)({
-            tagPrefix,
-            skipUnstable
+            tagPrefix: config.tagPrefix,
+            skipUnstable: config.skipUnstable
         }, (err, tags) => {
             if (!tags || !tags.length) {
                 const currentVersion = '0.0.0';
@@ -81,18 +123,18 @@ async function run() {
                 core.setOutput('release-type', 'patch');
                 core.debug('bumped = true');
                 core.setOutput('bumped', true);
-                core.debug(`current-version = ${prefix}, ${currentVersion}`);
-                (0, output_version_1.outputVersion)('current-version', prefix, currentVersion);
-                core.debug(`version = ${prefix}, ${nextVersion}`);
-                (0, output_version_1.outputVersion)('version', prefix, nextVersion);
-                core.info(`patch release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`);
+                core.debug(`current-version = ${config.prefix}, ${currentVersion}`);
+                (0, output_version_1.outputVersion)('current-version', config.prefix, currentVersion);
+                core.debug(`version = ${config.prefix}, ${nextVersion}`);
+                (0, output_version_1.outputVersion)('version', config.prefix, nextVersion);
+                core.info(`patch release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`);
                 return;
             }
             core.debug(`last tag = ${tags[0]}`);
             (0, git_raw_commits_1.default)({
                 format: '%B%n-hash-%n%H',
                 from: tags[0].toString() || '',
-                path
+                path: config.path
             })
                 .pipe((0, conventional_commits_parser_1.default)())
                 .pipe((0, concat_stream_1.default)(data => {
@@ -105,11 +147,11 @@ async function run() {
                     core.setOutput('release-type', 'none');
                     core.debug('bumped = false');
                     core.setOutput('bumped', false);
-                    core.debug(`current-version = ${prefix}, ${currentVersion}`);
-                    (0, output_version_1.outputVersion)('current-version', prefix, currentVersion);
-                    core.debug(`version = ${prefix}, ${currentVersion}`);
-                    (0, output_version_1.outputVersion)('version', prefix, currentVersion);
-                    core.info(`no release ${prefix}${currentVersion}`);
+                    core.debug(`current-version = ${config.prefix}, ${currentVersion}`);
+                    (0, output_version_1.outputVersion)('current-version', config.prefix, currentVersion);
+                    core.debug(`version = ${config.prefix}, ${currentVersion}`);
+                    (0, output_version_1.outputVersion)('version', config.prefix, currentVersion);
+                    core.info(`no release ${config.prefix}${currentVersion}`);
                     return;
                 }
                 const result = (0, what_bump_1.whatBump)(commits);
@@ -120,11 +162,11 @@ async function run() {
                 core.setOutput('release-type', result.releaseType);
                 core.debug('bumped = true');
                 core.setOutput('bumped', true);
-                core.debug(`current-version = ${prefix}, ${currentVersion}`);
-                (0, output_version_1.outputVersion)('current-version', prefix, currentVersion);
-                core.debug(`version = ${prefix}, ${nextVersion}`);
-                (0, output_version_1.outputVersion)('version', prefix, nextVersion);
-                core.info(`${result.releaseType} release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`);
+                core.debug(`current-version = ${config.prefix}, ${currentVersion}`);
+                (0, output_version_1.outputVersion)('current-version', config.prefix, currentVersion);
+                core.debug(`version = ${config.prefix}, ${nextVersion}`);
+                (0, output_version_1.outputVersion)('version', config.prefix, nextVersion);
+                core.info(`${result.releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`);
             }));
         });
     }

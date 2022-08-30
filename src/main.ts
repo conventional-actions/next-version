@@ -6,18 +6,16 @@ import gitRawCommits from 'git-raw-commits'
 import {whatBump} from './what-bump'
 import {outputVersion} from './output-version'
 import * as semver from 'semver'
+import {getConfig} from './config'
 
 async function run(): Promise<void> {
   try {
-    const path = core.getInput('path')
-    const prefix = core.getInput('prefix') || 'v'
-    const tagPrefix = core.getInput('tag-prefix') || 'v'
-    const skipUnstable = core.getInput('skip-unstable') === 'true'
+    const config = await getConfig()
 
     gitSemverTags(
       {
-        tagPrefix,
-        skipUnstable
+        tagPrefix: config.tagPrefix,
+        skipUnstable: config.skipUnstable
       },
       (err, tags) => {
         if (!tags || !tags.length) {
@@ -29,12 +27,12 @@ async function run(): Promise<void> {
           core.setOutput('release-type', 'patch')
           core.debug('bumped = true')
           core.setOutput('bumped', true)
-          core.debug(`current-version = ${prefix}, ${currentVersion}`)
-          outputVersion('current-version', prefix, currentVersion)
-          core.debug(`version = ${prefix}, ${nextVersion}`)
-          outputVersion('version', prefix, nextVersion)
+          core.debug(`current-version = ${config.prefix}, ${currentVersion}`)
+          outputVersion('current-version', config.prefix, currentVersion)
+          core.debug(`version = ${config.prefix}, ${nextVersion}`)
+          outputVersion('version', config.prefix, nextVersion)
           core.info(
-            `patch release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
+            `patch release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`
           )
           return
         }
@@ -44,7 +42,7 @@ async function run(): Promise<void> {
         gitRawCommits({
           format: '%B%n-hash-%n%H',
           from: tags[0].toString() || '',
-          path
+          path: config.path
         })
           .pipe(conventionalCommitsParser())
           .pipe(
@@ -60,11 +58,13 @@ async function run(): Promise<void> {
                 core.setOutput('release-type', 'none')
                 core.debug('bumped = false')
                 core.setOutput('bumped', false)
-                core.debug(`current-version = ${prefix}, ${currentVersion}`)
-                outputVersion('current-version', prefix, currentVersion)
-                core.debug(`version = ${prefix}, ${currentVersion}`)
-                outputVersion('version', prefix, currentVersion)
-                core.info(`no release ${prefix}${currentVersion}`)
+                core.debug(
+                  `current-version = ${config.prefix}, ${currentVersion}`
+                )
+                outputVersion('current-version', config.prefix, currentVersion)
+                core.debug(`version = ${config.prefix}, ${currentVersion}`)
+                outputVersion('version', config.prefix, currentVersion)
+                core.info(`no release ${config.prefix}${currentVersion}`)
                 return
               }
 
@@ -78,12 +78,14 @@ async function run(): Promise<void> {
               core.setOutput('release-type', result.releaseType)
               core.debug('bumped = true')
               core.setOutput('bumped', true)
-              core.debug(`current-version = ${prefix}, ${currentVersion}`)
-              outputVersion('current-version', prefix, currentVersion)
-              core.debug(`version = ${prefix}, ${nextVersion}`)
-              outputVersion('version', prefix, nextVersion)
+              core.debug(
+                `current-version = ${config.prefix}, ${currentVersion}`
+              )
+              outputVersion('current-version', config.prefix, currentVersion)
+              core.debug(`version = ${config.prefix}, ${nextVersion}`)
+              outputVersion('version', config.prefix, nextVersion)
               core.info(
-                `${result.releaseType} release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
+                `${result.releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`
               )
             })
           )
