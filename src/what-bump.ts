@@ -16,7 +16,7 @@ export const whatBump = (commits: any): BumpInfo => {
   let features = 0
 
   for (const commit of commits) {
-    core.debug(`evaluating commit ${commit}`)
+    core.debug(`evaluating commit ${JSON.stringify(commit)}`)
 
     // adds additional breaking change notes
     // for the special case, test(system)!: hello world, where there is

@@ -100,13 +100,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
+const semver = __importStar(__nccwpck_require__(1383));
 const concat_stream_1 = __importDefault(__nccwpck_require__(5107));
 const conventional_commits_parser_1 = __importDefault(__nccwpck_require__(1655));
 const git_semver_tags_1 = __importDefault(__nccwpck_require__(2408));
 const git_raw_commits_1 = __importDefault(__nccwpck_require__(9834));
 const what_bump_1 = __nccwpck_require__(2);
 const output_version_1 = __nccwpck_require__(1629);
-const semver = __importStar(__nccwpck_require__(1383));
 const config_1 = __nccwpck_require__(88);
 async function run() {
     try {
@@ -116,18 +116,7 @@ async function run() {
             skipUnstable: config.skipUnstable
         }, (err, tags) => {
             if (!tags || !tags.length) {
-                const currentVersion = '0.0.0';
-                const nextVersion = '0.0.1';
-                core.warning('No tags');
-                core.debug('release-type = patch');
-                core.setOutput('release-type', 'patch');
-                core.debug('bumped = true');
-                core.setOutput('bumped', true);
-                core.debug(`current-version = ${config.prefix}, ${currentVersion}`);
-                (0, output_version_1.outputVersion)('current-version', config.prefix, currentVersion);
-                core.debug(`version = ${config.prefix}, ${nextVersion}`);
-                (0, output_version_1.outputVersion)('version', config.prefix, nextVersion);
-                core.info(`patch release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`);
+                (0, output_version_1.outputVariables)('patch', config.prefix, '0.0.0', '0.0.1');
                 return;
             }
             core.debug(`last tag = ${tags[0]}`);
@@ -140,33 +129,18 @@ async function run() {
                 .pipe((0, concat_stream_1.default)(data => {
                 const commits = data;
                 const currentVersion = semver.clean(tags[0].toString()) || '0.0.0';
-                core.debug(`current version = ${currentVersion}`);
-                if (!commits || !commits.length) {
-                    core.warning('No commits since last release');
-                    core.debug('release-type = none');
-                    core.setOutput('release-type', 'none');
-                    core.debug('bumped = false');
-                    core.setOutput('bumped', false);
-                    core.debug(`current-version = ${config.prefix}, ${currentVersion}`);
-                    (0, output_version_1.outputVersion)('current-version', config.prefix, currentVersion);
-                    core.debug(`version = ${config.prefix}, ${currentVersion}`);
-                    (0, output_version_1.outputVersion)('version', config.prefix, currentVersion);
-                    core.info(`no release ${config.prefix}${currentVersion}`);
-                    return;
+                if (commits && commits.length) {
+                    const result = (0, what_bump_1.whatBump)(commits);
+                    const releaseType = result.releaseType;
+                    const nextVersion = semver.inc(currentVersion, result.releaseType) || '0.0.1';
+                    core.debug(`whatBump = ${JSON.stringify(result)}`);
+                    core.info(`${releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`);
+                    (0, output_version_1.outputVariables)(releaseType, config.prefix, currentVersion, nextVersion);
                 }
-                const result = (0, what_bump_1.whatBump)(commits);
-                core.debug(`whatBump = ${result}`);
-                const nextVersion = semver.inc(currentVersion, result.releaseType) || '0.0.1';
-                core.debug(`nextVersion = ${nextVersion}`);
-                core.debug(`release-type = result.releaseType`);
-                core.setOutput('release-type', result.releaseType);
-                core.debug('bumped = true');
-                core.setOutput('bumped', true);
-                core.debug(`current-version = ${config.prefix}, ${currentVersion}`);
-                (0, output_version_1.outputVersion)('current-version', config.prefix, currentVersion);
-                core.debug(`version = ${config.prefix}, ${nextVersion}`);
-                (0, output_version_1.outputVersion)('version', config.prefix, nextVersion);
-                core.info(`${result.releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`);
+                else {
+                    core.warning('No commits since last release');
+                    (0, output_version_1.outputVariables)('none', config.prefix, currentVersion, currentVersion);
+                }
             }));
         });
     }
@@ -209,9 +183,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.outputVersion = void 0;
+exports.outputVersion = exports.outputVariables = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const semver = __importStar(__nccwpck_require__(1383));
+const outputVariables = (releaseType, prefix, currentVersion, nextVersion) => {
+    core.debug(`current version = ${currentVersion}`);
+    core.debug(`nextVersion = ${nextVersion}`);
+    const bumped = nextVersion !== currentVersion;
+    core.debug(`bumped = ${bumped}`);
+    core.setOutput('bumped', bumped);
+    core.exportVariable('VERSION_BUMPED', bumped);
+    core.debug(`release-type = ${releaseType}`);
+    core.setOutput('release-type', releaseType);
+    core.exportVariable('VERSION_RELEASE_TYPE', releaseType);
+    core.debug(`current-version = ${prefix}${currentVersion}`);
+    (0, exports.outputVersion)('current-version', prefix, currentVersion);
+    core.debug(`version = ${prefix}${nextVersion}`);
+    (0, exports.outputVersion)('version', prefix, nextVersion);
+    return;
+};
+exports.outputVariables = outputVariables;
 const outputVersion = (name, prefix, version) => {
     core.setOutput(name, `${prefix}${version}`);
     core.setOutput(`${name}-major`, `${prefix}${semver.major(version)}`);
@@ -221,6 +212,15 @@ const outputVersion = (name, prefix, version) => {
     core.setOutput(`${name}-minor-only`, semver.minor(version));
     core.setOutput(`${name}-patch-only`, semver.patch(version));
     core.setOutput(`${name}-prerelease-only`, semver.prerelease(version));
+    name = name.toUpperCase();
+    core.exportVariable(name, `${prefix}${version}`);
+    core.exportVariable(`${name}_MAJOR`, `${prefix}${semver.major(version)}`);
+    core.exportVariable(`${name}_MINOR`, `${prefix}${semver.major(version)}.${semver.minor(version)}`);
+    core.exportVariable(`${name}_PATCH`, `${prefix}${semver.major(version)}.${semver.minor(version)}.${semver.patch(version)}`);
+    core.exportVariable(`${name}_MAJOR_ONLY`, semver.major(version));
+    core.exportVariable(`${name}_MINOR_ONLY`, semver.minor(version));
+    core.exportVariable(`${name}_PATCH_ONLY`, semver.patch(version));
+    core.exportVariable(`${name}_PRERELEASE_ONLY`, semver.prerelease(version));
 };
 exports.outputVersion = outputVersion;
 
@@ -265,7 +265,7 @@ const whatBump = (commits) => {
     let breakings = 0;
     let features = 0;
     for (const commit of commits) {
-        core.debug(`evaluating commit ${commit}`);
+        core.debug(`evaluating commit ${JSON.stringify(commit)}`);
         // adds additional breaking change notes
         // for the special case, test(system)!: hello world, where there is
         // a '!' but no 'BREAKING CHANGE' in body:

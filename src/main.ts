@@ -1,11 +1,11 @@
 import * as core from '@actions/core'
+import * as semver from 'semver'
 import concat from 'concat-stream'
 import conventionalCommitsParser from 'conventional-commits-parser'
 import gitSemverTags from 'git-semver-tags'
 import gitRawCommits from 'git-raw-commits'
 import {whatBump} from './what-bump'
-import {outputVersion} from './output-version'
-import * as semver from 'semver'
+import {outputVariables} from './output-version'
 import {getConfig} from './config'
 
 async function run(): Promise<void> {
@@ -19,21 +19,7 @@ async function run(): Promise<void> {
       },
       (err, tags) => {
         if (!tags || !tags.length) {
-          const currentVersion = '0.0.0'
-          const nextVersion = '0.0.1'
-
-          core.warning('No tags')
-          core.debug('release-type = patch')
-          core.setOutput('release-type', 'patch')
-          core.debug('bumped = true')
-          core.setOutput('bumped', true)
-          core.debug(`current-version = ${config.prefix}, ${currentVersion}`)
-          outputVersion('current-version', config.prefix, currentVersion)
-          core.debug(`version = ${config.prefix}, ${nextVersion}`)
-          outputVersion('version', config.prefix, nextVersion)
-          core.info(
-            `patch release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`
-          )
+          outputVariables('patch', config.prefix, '0.0.0', '0.0.1')
           return
         }
 
@@ -50,43 +36,34 @@ async function run(): Promise<void> {
               const commits = data
 
               const currentVersion = semver.clean(tags[0].toString()) || '0.0.0'
-              core.debug(`current version = ${currentVersion}`)
 
-              if (!commits || !commits.length) {
-                core.warning('No commits since last release')
-                core.debug('release-type = none')
-                core.setOutput('release-type', 'none')
-                core.debug('bumped = false')
-                core.setOutput('bumped', false)
-                core.debug(
-                  `current-version = ${config.prefix}, ${currentVersion}`
+              if (commits && commits.length) {
+                const result = whatBump(commits)
+                const releaseType = result.releaseType
+                const nextVersion =
+                  semver.inc(currentVersion, result.releaseType) || '0.0.1'
+
+                core.debug(`whatBump = ${JSON.stringify(result)}`)
+                core.info(
+                  `${releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`
                 )
-                outputVersion('current-version', config.prefix, currentVersion)
-                core.debug(`version = ${config.prefix}, ${currentVersion}`)
-                outputVersion('version', config.prefix, currentVersion)
-                core.info(`no release ${config.prefix}${currentVersion}`)
-                return
+
+                outputVariables(
+                  releaseType,
+                  config.prefix,
+                  currentVersion,
+                  nextVersion
+                )
+              } else {
+                core.warning('No commits since last release')
+
+                outputVariables(
+                  'none',
+                  config.prefix,
+                  currentVersion,
+                  currentVersion
+                )
               }
-
-              const result = whatBump(commits)
-              core.debug(`whatBump = ${result}`)
-              const nextVersion =
-                semver.inc(currentVersion, result.releaseType) || '0.0.1'
-
-              core.debug(`nextVersion = ${nextVersion}`)
-              core.debug(`release-type = result.releaseType`)
-              core.setOutput('release-type', result.releaseType)
-              core.debug('bumped = true')
-              core.setOutput('bumped', true)
-              core.debug(
-                `current-version = ${config.prefix}, ${currentVersion}`
-              )
-              outputVersion('current-version', config.prefix, currentVersion)
-              core.debug(`version = ${config.prefix}, ${nextVersion}`)
-              outputVersion('version', config.prefix, nextVersion)
-              core.info(
-                `${result.releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`
-              )
             })
           )
       }
