@@ -49,7 +49,7 @@ export const outputVersion = (
   core.setOutput(`${name}-patch-only`, semver.patch(version))
   core.setOutput(`${name}-prerelease-only`, semver.prerelease(version))
 
-  name = name.toUpperCase()
+  name = name.toUpperCase().replaceAll('-', '_')
   core.exportVariable(name, `${prefix}${version}`)
   core.exportVariable(`${name}_MAJOR`, `${prefix}${semver.major(version)}`)
   core.exportVariable(

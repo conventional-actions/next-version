@@ -212,7 +212,7 @@ const outputVersion = (name, prefix, version) => {
     core.setOutput(`${name}-minor-only`, semver.minor(version));
     core.setOutput(`${name}-patch-only`, semver.patch(version));
     core.setOutput(`${name}-prerelease-only`, semver.prerelease(version));
-    name = name.toUpperCase();
+    name = name.toUpperCase().replaceAll('-', '_');
     core.exportVariable(name, `${prefix}${version}`);
     core.exportVariable(`${name}_MAJOR`, `${prefix}${semver.major(version)}`);
     core.exportVariable(`${name}_MINOR`, `${prefix}${semver.major(version)}.${semver.minor(version)}`);
