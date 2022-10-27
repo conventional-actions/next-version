@@ -48,7 +48,7 @@
     "@types/git-raw-commits": "^2.0.1",
     "@types/git-semver-tags": "^4.1.1",
     "@types/node": "^18.11.6",
-    "@types/semver": "^7.3.12",
+    "@types/semver": "^7.3.13",
     "@typescript-eslint/parser": "^5.41.0",
     "@vercel/ncc": "^0.34.0",
     "eslint": "^8.26.0",
