@@ -14,7 +14,7 @@ Please note that this project is released with a [Contributor Code of Conduct][c
 
 1. [Fork][fork] and clone the repository
 2. Configure and install the dependencies: `npm install`
-3. Build the source code: `npm build`
+3. Build the source code: `npm run build`
 4. Make sure the tests pass on your machine: `npm run test`
 5. Create a new branch: `git checkout -b my-branch-name`
 6. Make your change, add tests, and make sure the tests still pass
