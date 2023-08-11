@@ -14,12 +14,14 @@ async function run(): Promise<void> {
 
     gitSemverTags(
       {
-        tagPrefix: config.tagPrefix,
+        tagPrefix: config.noTagPrefix ? '' : config.tagPrefix,
         skipUnstable: config.skipUnstable
       },
       (err, tags) => {
+        const prefix = config.noPrefix ? '' : config.prefix
+
         if (!tags || !tags.length) {
-          outputVariables('patch', config.prefix, '0.0.0', '0.0.1')
+          outputVariables('patch', prefix, '0.0.0', '0.0.1')
           return
         }
 
@@ -45,24 +47,19 @@ async function run(): Promise<void> {
 
                 core.debug(`whatBump = ${JSON.stringify(result)}`)
                 core.info(
-                  `${releaseType} release ${config.prefix}${currentVersion} -> ${config.prefix}${nextVersion}`
+                  `${releaseType} release ${prefix}${currentVersion} -> ${prefix}${nextVersion}`
                 )
 
                 outputVariables(
                   releaseType,
-                  config.prefix,
+                  prefix,
                   currentVersion,
                   nextVersion
                 )
               } else {
                 core.warning('No commits since last release')
 
-                outputVariables(
-                  'none',
-                  config.prefix,
-                  currentVersion,
-                  currentVersion
-                )
+                outputVariables('none', prefix, currentVersion, currentVersion)
               }
             })
           )

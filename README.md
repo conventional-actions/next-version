@@ -16,7 +16,9 @@ To use the GitHub Action, add the following to your job:
 | Name            | Default | Description                                                             |
 |-----------------|---------|-------------------------------------------------------------------------|
 | `prefix`        | `v`     | prefix to prepend to versions                                           |
+| `no-prefix`     | `false` | if true, prefix is omitted from the versions                            |
 | `tag-prefix`    | `v`     | specify a prefix for the git tag to be ignored from the semver checks   |
+| `no-tag-prefix` | `false` | if true, tag-prefix is omitted and nothing will be ignored              |
 | `path`          | `.`     | filter commits to the path provided                                     |
 | `skip-unstable` | `false` | if true, unstable tags (e.g. x.x.x-alpha.1, x.x.x-rc.2) will be skipped |
 

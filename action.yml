@@ -12,10 +12,18 @@ inputs:
     required: false
     description: 'prefix to prepend to versions'
     default: 'v'
+  no-prefix:
+    required: false
+    description: 'if true, prefix is omitted from the versions'
+    default: 'false'
   tag-prefix:
     required: false
     description: 'specify a prefix for the git tag to be ignored from the semver checks'
     default: 'v'
+  no-tag-prefix:
+    required: false
+    description: 'if true, tag-prefix is omitted and nothing will be ignored'
+    default: 'false'
   skip-unstable:
     required: false
     description: 'if true, unstable tags (e.g. x.x.x-alpha.1, x.x.x-rc.2) will be skipped'
