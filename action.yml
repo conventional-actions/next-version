@@ -58,5 +58,5 @@ outputs:
   bumped:
     description: 'true if the version has been bumped'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
